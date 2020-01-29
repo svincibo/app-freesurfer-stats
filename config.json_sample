@@ -1,0 +1,4 @@
+{
+	"freesurfer":	"testdata/freesurfer/output/",
+	"parcellation":	"aparc.a2009s"
+}
