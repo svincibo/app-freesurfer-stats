@@ -1,6 +1,6 @@
 #!/bin/bash
-#PBS -l nodes=1:ppn=4,vmem=100gb,walltime=00:45:00
-#PBS -N roi-stats
+#PBS -l nodes=1:ppn=4,vmem=29gb,walltime=00:30:00
+#PBS -N app-freesurfer-stats
 #PBS -V
 
 fsdir=`jq -r '.freesurfer' config.json`
