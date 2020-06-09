@@ -14,7 +14,7 @@ if [ ! -f ${parc}+aseg.nii.gz ]; then
 fi
 
 if [ ! -f whole_brain.csv ]; then
-	time singularity exec -e docker://brainlife/freesurfer-stats:latest ./create_data_csv.py
+	time singularity exec -e docker://brainlife/freesurfer-stats:1.2 ./create_data_csv.py
 fi
 
 if [ ! -f rois.csv ]; then
