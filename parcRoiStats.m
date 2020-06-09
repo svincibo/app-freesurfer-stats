@@ -29,6 +29,5 @@ parcellation = fullfile(topdir,sprintf('%s.nii.gz',config.parcellation));
 % save stats file
 writetable(parcStats,'rois.csv');
 
-end
 exit
-
+end
