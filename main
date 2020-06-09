@@ -25,7 +25,7 @@ if [ ! -f whole_brain.csv ] || [ ! -f rois.csv ]; then
 	echo "output missing" && exit 1
 else
 	echo "complete" && mkdir -p ./parc-stats/ && mv *.csv ./parc-stats/ && rm -rf *.nii.gz
-    	echo "{\tags\": [\"${parc}\" ]}" > product.json
+	echo "{\"tags\": [\"${parc}\"]}"
     	exit 0
 
 fi
