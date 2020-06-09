@@ -24,5 +24,5 @@ fi
 if [ ! -f whole_brain.csv ] || [ ! -f rois.csv ]; then
 	echo "output missing" && exit 1
 else
-	echo "complete" && mkdir -p ./output/ && mv *.csv ./output/ && rm -rf *.nii.gz && exit 0
+	echo "complete" && mkdir -p ./parc-stats/ && mv *.csv ./parc-stats/ && rm -rf *.nii.gz && exit 0
 fi
