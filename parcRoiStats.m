@@ -21,7 +21,7 @@ topdir = pwd;
 config = loadjson('config.json');
 
 % set path for parcellation
-parcellation = fullfile(topdir,sprintf('%s.nii.gz',config.parcellation));
+parcellation = fullfile(topdir,sprintf('%s+aseg.nii.gz',config.parcellation));
 
 % run stats code
 [parcStats] = bsc_computeAtlasStats_v2(parcellation);

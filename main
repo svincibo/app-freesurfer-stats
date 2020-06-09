@@ -10,7 +10,7 @@ parc=`jq -r '.parcellation' config.json`
 echo $FREESURFER_LICENSE > license.txt
 
 if [ ! -f ${parc}.nii.gz ]; then
-  time singularity exec -e -B `pwd`/license.txt:/usr/local/freesurfer/license.txt docker://brainlife/freesurfer-mini:6.0.1 bash -c "mri_convert ${fsdir}/mri/${parc}.mgz ./${parc}.nii.gz"
+  time singularity exec -e -B `pwd`/license.txt:/usr/local/freesurfer/license.txt docker://brainlife/freesurfer-mini:6.0.1 bash -c "mri_convert ${fsdir}/mri/${parc}+aseg.mgz ./${parc}+aseg.nii.gz"
 fi
 
 if [ ! -f whole_brain.csv ]; then
@@ -18,7 +18,7 @@ if [ ! -f whole_brain.csv ]; then
 fi
 
 if [ ! -f rois.csv ]; then
-	time singularity exec -e docker://brainlife/mcr:r2020a ./ROI/parcRoiStats
+	time singularity exec -e docker://brainlife/mcr:r2019a ./compiled/parcRoiStats
 fi
 
 [ ! -f whole_brain.csv ||  ! -f rois.csv ] && echo "output missing" && exit 1 || echo "complete" && mkdir -p ./output/ && mv *.csv ./output/ && exit 0
