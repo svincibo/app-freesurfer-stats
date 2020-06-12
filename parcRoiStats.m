@@ -24,7 +24,7 @@ config = loadjson('config.json');
 parcellation = fullfile(topdir,sprintf('%s+aseg.nii.gz',config.parcellation));
 
 % run stats code
-[parcStats] = bsc_computeAtlasStats_v2(parcellation);
+[parcStats] = bsc_computeAtlasStats_v2_outlier_coords(parcellation);
 
 % save stats file
 writetable(parcStats,'rois.csv');
