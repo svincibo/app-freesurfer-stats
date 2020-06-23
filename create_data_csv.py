@@ -11,11 +11,11 @@ from freesurfer_stats import CorticalParcellationStats
 
 def extract_wm_stats(input_data_lines):
     lines_var = input_data_lines.readlines()
-    lh = lines_var[14]
+    lh = lines_var[lines_var.index([ f for f in lines_var if 'lhCerebralWhiteMatter' in f ][0])]
     lh = lh.replace(',','')
-    rh = lines_var[15]
+    rh = lines_var[lines_var.index([ f for f in lines_var if 'rhCerebralWhiteMatter' in f ][0])]
     rh = rh.replace(',','')
-    tot = lines_var[16]
+    tot = lines_var[lines_var.index([ f for f in lines_var if 'Total cerebral white matter volume' in f ][0])]
     tot = tot.replace(',','')
     lh_wm_vol = float(lh.split()[10])
     rh_wm_vol = float(rh.split()[10])
