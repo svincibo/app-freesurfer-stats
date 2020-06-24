@@ -62,7 +62,7 @@ white_matter_stats = open(output_dir+'/stats/wmparc.stats')
 
 whole_brain = lh_stats.whole_brain_measurements[['brain_segmentation_volume_mm^3','estimated_total_intracranial_volume_mm^3']]
 whole_brain = whole_brain.rename(columns={"brain_segmentation_volume_mm^3": "Total Brain Volume", "estimated_total_intracranial_volume_mm^3": "Total Intracranial Volume"})
-whole_brain.insert(2,"SubjectID",subjectID)
+whole_brain.insert(2,"subjectID",subjectID)
 whole_brain.insert(3,"Total Cortical Gray Matter Volume",lh_stats.whole_brain_measurements['total_cortical_gray_matter_volume_mm^3'],True)
 whole_brain.insert(4,"Total White Matter Volume",tot_wm_vol,True)
 whole_brain.insert(5,"Left Hemisphere Cortical Gray Matter Volume",numpy.sum(lh_stats.structural_measurements['gray_matter_volume_mm^3']),True)
