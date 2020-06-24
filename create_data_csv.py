@@ -32,12 +32,12 @@ with open('config.json') as config_f:
 # left hemisphere
 lh_stats = CorticalParcellationStats.read(output_dir+'/stats/lh.'+parc+'.stats')
 dfl = lh_stats.structural_measurements
-dfl.to_csv('lh.cortex.csv')
+dfl.to_csv('lh.cortex.csv',index=False)
 
 # right hemisphere
 rh_stats = CorticalParcellationStats.read(output_dir+'/stats/rh.'+parc+'.stats')
 dfr = rh_stats.structural_measurements
-dfr.to_csv('rh.cortex.csv')
+dfr.to_csv('rh.cortex.csv',index=False)
 
 # whole brain
 white_matter_stats = open(output_dir+'/stats/wmparc.stats')
@@ -54,4 +54,4 @@ whole_brain.insert(7,"Right Hemisphere White Matter Volume",rh_wm_vol,True)
 whole_brain.insert(8,"Left Hemisphere Mean Cortical Gray Matter Thickness",lh_stats.whole_brain_measurements['mean_thickness_mm'],True)
 whole_brain.insert(9,"Right Hemisphere Mean Cortical Gray Matter Thickness",rh_stats.whole_brain_measurements['mean_thickness_mm'],True)
 
-whole_brain.to_csv('whole_brain.csv')
+whole_brain.to_csv('whole_brain.csv',index=False)
