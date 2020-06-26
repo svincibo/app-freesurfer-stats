@@ -31,5 +31,5 @@ do
 	mri_segstats --seg ${freesurfer}/mri/aseg.mgz --i ${MET}_ribbon.nii.gz --ctab $FREESURFER_HOME/FreesurferColorLUT.txt --nonempty --exclude 0 --sum subcort.${MET}.sum
 
 	tail stats/subcort.${METRICS}.sum -n +55 > subcort.${METRICS}.txt
-	awk '{print $2,$3,$6,$7,$8,$9,$10}' subcort.${METRICS}.txt > label/$METRICS/subcort_num.${METRICS}.txt;
+	awk '{print $2,$3,$6,$7,$8,$9,$10}' subcort.${METRICS}.txt > subcort_num.${METRICS}.txt;
 done
