@@ -15,7 +15,7 @@ with open('config.json') as config_f:
 if not os.path.exists('parc-stats'):
     os.mkdir('parc-stats')
 
-diffusion_measures = [ f.split('.')[1] for f in os.listdir('./') if f.split('.')[0] == 'subcort_num' ]
+diffusion_measures = [ f.split('.')[1] for f in os.listdir('./') if f.split('.')[0] == 'subcort_num' if f.split('.')[2] == 'csv' ]
 
 data_columns = ['parcID','subjectID','structureID','nodeID','number_of_voxels'] + diffusion_measures + ['volume']
 

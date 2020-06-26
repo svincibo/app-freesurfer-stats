@@ -18,8 +18,8 @@ fi
 
 if [ ! -f ./parc-stats/aseg_nodes.csv ]; then
 	echo "output missing"
-	#exit 1
+	exit 1
 else
 	echo "complete" && mkdir -p raw && mv *.txt *.csv *.sum ./raw/ && rm -rf *.nii.gz
-   	#exit 0
+   	exit 0
 fi
