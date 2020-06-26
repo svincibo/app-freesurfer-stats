@@ -7,69 +7,34 @@ import glob
 import sys
 import os
 import pandas as pd
-from freesurfer_stats import CorticalParcellationStats
-
-def extract_wm_stats(input_data_lines):
-    lines_var = input_data_lines.readlines()
-    lh = lines_var[lines_var.index([ f for f in lines_var if 'lhCerebralWhiteMatter' in f ][0])]
-    lh = lh.replace(',','')
-    rh = lines_var[lines_var.index([ f for f in lines_var if 'rhCerebralWhiteMatter' in f ][0])]
-    rh = rh.replace(',','')
-    tot = lines_var[lines_var.index([ f for f in lines_var if 'Total cerebral white matter volume' in f ][0])]
-    tot = tot.replace(',','')
-    lh_wm_vol = float(lh.split()[10])
-    rh_wm_vol = float(rh.split()[10])
-    tot_wm_vol = float(tot.split()[9])
-
-    return [lh_wm_vol,rh_wm_vol,tot_wm_vol]
-
 
 with open('config.json') as config_f:
     config = json.load(config_f)
-    output_dir = config["freesurfer"]
-    parc = config["parcellation"]
     subjectID = config['_inputs'][0]['meta']['subject']
 
-# left hemisphere
-lh_stats = CorticalParcellationStats.read(output_dir+'/stats/lh.'+parc+'.stats')
-dfl = lh_stats.structural_measurements
-dfl.rename(columns={'structure_name': 'structureID'},inplace=True)
-dfl['structureID'] = [ 'lh_'+dfl['structureID'][f] for f in range(len(dfl['structureID'])) ]
-dfl['subjectID'] = [ subjectID for x in range(len(dfl['structureID'])) ]
-dfl['parcID'] = [ f+1 for f in range(len(dfl['structureID']))]
-dfl['nodeID'] = [ int(1) for f in range(len(dfl['structureID'])) ]
-dfl = dfl.reindex(columns=['parcID','subjectID','structureID','nodeID','number_of_vertices', 'surface_area_mm^2','gray_matter_volume_mm^3', 'average_thickness_mm','thickness_stddev_mm', 'integrated_rectified_mean_curvature_mm^-1','integrated_rectified_gaussian_curvature_mm^-2', 'folding_index','intrinsic_curvature_index'])
-dfl.to_csv('lh.cortex.csv',index=False)
+if not os.path.exists('parc-stats'):
+    os.mkdir('parc-stats')
 
-# right hemisphere
-rh_stats = CorticalParcellationStats.read(output_dir+'/stats/rh.'+parc+'.stats')
-dfr = rh_stats.structural_measurements
-dfr.rename(columns={'structure_name': 'structureID'},inplace=True)
-dfr['structureID'] = [ 'rh_'+dfr['structureID'][f] for f in range(len(dfr['structureID'])) ]
-dfr['subjectID'] = [ subjectID for x in range(len(dfr['structureID'])) ]
-dfr['parcID'] = [ f+1 for f in range(len(dfr['structureID']))]
-dfr['nodeID'] = [ int(1) for f in range(len(dfr['structureID'])) ]
-dfr = dfr.reindex(columns=['parcID','subjectID','structureID','nodeID','number_of_vertices', 'surface_area_mm^2','gray_matter_volume_mm^3', 'average_thickness_mm','thickness_stddev_mm', 'integrated_rectified_mean_curvature_mm^-1','integrated_rectified_gaussian_curvature_mm^-2', 'folding_index','intrinsic_curvature_index'])
-dfr.to_csv('rh.cortex.csv',index=False)
+diffusion_measures = [ f.split('.')[1] for f in os.listdir('./') if f.split('.')[0] == 'subcort_num' ]
 
-# concat left and righ hemispheres
-dft = pd.concat([dfl,dfr],ignore_index=True)
-dft.to_csv('cortex.csv',index=False)
+data_columns = ['parcID','subjectID','structureID','nodeID','number_of_voxels'] + diffusion_measures + ['volume']
 
-# whole brain
-white_matter_stats = open(output_dir+'/stats/wmparc.stats')
-[lh_wm_vol,rh_wm_vol,tot_wm_vol] = extract_wm_stats(white_matter_stats)
+aseg_data = pd.DataFrame([],columns=data_columns)
 
-whole_brain = lh_stats.whole_brain_measurements[['brain_segmentation_volume_mm^3','estimated_total_intracranial_volume_mm^3']]
-whole_brain = whole_brain.rename(columns={"brain_segmentation_volume_mm^3": "Total Brain Volume", "estimated_total_intracranial_volume_mm^3": "Total Intracranial Volume"})
-whole_brain.insert(2,"subjectID",subjectID)
-whole_brain.insert(3,"Total Cortical Gray Matter Volume",lh_stats.whole_brain_measurements['total_cortical_gray_matter_volume_mm^3'],True)
-whole_brain.insert(4,"Total White Matter Volume",tot_wm_vol,True)
-whole_brain.insert(5,"Left Hemisphere Cortical Gray Matter Volume",numpy.sum(lh_stats.structural_measurements['gray_matter_volume_mm^3']),True)
-whole_brain.insert(6,"Right Hemisphere Cortical Gray Matter Volume",numpy.sum(rh_stats.structural_measurements['gray_matter_volume_mm^3']),True)
-whole_brain.insert(7,"Left Hemisphere White Matter Volume",lh_wm_vol,True)
-whole_brain.insert(8,"Right Hemisphere White Matter Volume",rh_wm_vol,True)
-whole_brain.insert(9,"Left Hemisphere Mean Cortical Gray Matter Thickness",lh_stats.whole_brain_measurements['mean_thickness_mm'],True)
-whole_brain.insert(10,"Right Hemisphere Mean Cortical Gray Matter Thickness",rh_stats.whole_brain_measurements['mean_thickness_mm'],True)
-whole_brain = whole_brain.reindex(columns=['subjectID','Total Brain Volume','Total Intracranial Volume','Total Cortical Gray Matter Volume','Total White Matter Volume','Left Hemisphere Cortical Gray Matter Volume','Right Hemisphere Cortical Gray Matter Volume','Left Hemisphere White Matter Volume','Right Hemisphere White Matter Volume','Left Hemisphere Mean Cortical Gray Matter Thickness','Right Hemisphere Mean Cortical Gray Matter Thickness'])
-whole_brain.to_csv('whole_brain.csv',index=False)
+file_data_columns = open('subcort_cols.txt').read().split('#')[1].strip().split()[2:]
+
+for dm in range(len(diffusion_measures)):
+    measures = pd.read_csv(('subcort_num.%s.csv' %diffusion_measures[dm]),header=None,names=file_data_columns)
+    if dm == 0:
+        aseg_data['structureID'] = measures['StructName']
+        aseg_data['subjectID'] = [ subjectID for f in range(len(aseg_data['structureID'])) ]
+        aseg_data['nodeID'] = [ 1 for f in range(len(aseg_data['structureID'])) ]
+        aseg_data['parcID'] = measures['SegId']
+        aseg_data['number_of_voxels'] =  measures['NVoxels']
+        aseg_data['volume'] = measures['Volume_mm3']
+
+    aseg_data[diffusion_measures[dm]] = measures['Mean']
+
+aseg_data.to_csv('./parc-stats/aseg_nodes.csv',index=False)
+
+
