@@ -25,7 +25,7 @@ elif 'fa' in diffusion_measures:
 else:
     diffusion_measures = ['ndi','isovf','odi','snr','volume']
 
-data_columns = ['parcID','subjectID','structureID','nodeID','number_of_voxels'] + diffusion_measures.sort() + ['volume']
+data_columns = ['parcID','subjectID','structureID','nodeID','number_of_voxels'] + diffusion_measures
 
 aseg_data = pd.DataFrame([],columns=data_columns)
 
