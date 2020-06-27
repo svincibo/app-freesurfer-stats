@@ -17,7 +17,15 @@ if not os.path.exists('parc-stats'):
 
 diffusion_measures = [ f.split('.')[1] for f in os.listdir('./tmp/') if f.split('.')[0] == 'subcort_num' if f.split('.')[2] == 'csv' ]
 
-data_columns = ['parcID','subjectID','structureID','nodeID','number_of_voxels'] + diffusion_measures + ['volume']
+# set up the way i like
+if all(x in diffusion_measures for x in ['ndi','fa']):
+    diffusion_measures = ['ad','fa','md','rd','ndi','isovf','odi','snr','volume']
+elif 'fa' in diffusion_measures:
+    diffusion_measures = ['ad','fa','md','rd','snr','volume']
+else:
+    diffusion_measures = ['ndi','isovf','odi','snr','volume']
+
+data_columns = ['parcID','subjectID','structureID','nodeID','number_of_voxels'] + diffusion_measures.sort() + ['volume']
 
 aseg_data = pd.DataFrame([],columns=data_columns)
 
@@ -35,7 +43,6 @@ for dm in range(len(diffusion_measures)):
 
     aseg_data[diffusion_measures[dm]] = measures['Mean']
 
-aseg_data = aseg_data.reindex(columns=data_columns)
 aseg_data.to_csv('./parc-stats/aseg_nodes.csv',index=False)
 
 
