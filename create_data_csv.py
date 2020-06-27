@@ -19,13 +19,13 @@ diffusion_measures = [ f.split('.')[1] for f in os.listdir('./tmp/') if f.split(
 
 # set up the way i like
 if all(x in diffusion_measures for x in ['ndi','fa']):
-    diffusion_measures = ['ad','fa','md','rd','ndi','isovf','odi','volume']
+    diffusion_measures = ['ad','fa','md','rd','ndi','isovf','odi']
 elif 'fa' in diffusion_measures:
-    diffusion_measures = ['ad','fa','md','rd','volume']
+    diffusion_measures = ['ad','fa','md','rd']
 else:
-    diffusion_measures = ['ndi','isovf','odi','volume']
+    diffusion_measures = ['ndi','isovf','odi']
 
-data_columns = ['parcID','subjectID','structureID','nodeID','number_of_voxels'] + diffusion_measures
+data_columns = ['parcID','subjectID','structureID','nodeID','number_of_voxels'] + diffusion_measures + ['volume']
 
 aseg_data = pd.DataFrame([],columns=data_columns)
 
