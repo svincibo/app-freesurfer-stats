@@ -19,11 +19,11 @@ diffusion_measures = [ f.split('.')[1] for f in os.listdir('./tmp/') if f.split(
 
 # set up the way i like
 if all(x in diffusion_measures for x in ['ndi','fa']):
-    diffusion_measures = ['ad','fa','md','rd','ndi','isovf','odi','snr','volume']
+    diffusion_measures = ['ad','fa','md','rd','ndi','isovf','odi','volume']
 elif 'fa' in diffusion_measures:
-    diffusion_measures = ['ad','fa','md','rd','snr','volume']
+    diffusion_measures = ['ad','fa','md','rd','volume']
 else:
-    diffusion_measures = ['ndi','isovf','odi','snr','volume']
+    diffusion_measures = ['ndi','isovf','odi','volume']
 
 data_columns = ['parcID','subjectID','structureID','nodeID','number_of_voxels'] + diffusion_measures
 
