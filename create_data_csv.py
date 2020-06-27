@@ -35,6 +35,7 @@ for dm in range(len(diffusion_measures)):
 
     aseg_data[diffusion_measures[dm]] = measures['Mean']
 
+aseg_data = aseg_data.reindex(columns=data_columns)
 aseg_data.to_csv('./parc-stats/aseg_nodes.csv',index=False)
 
 
