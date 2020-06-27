@@ -3,6 +3,8 @@
 #PBS -N app-freesurfer-stats-subcortical
 #PBS -V
 
+set -e
+
 [ -z "$FREESURFER_LICENSE" ] && echo "Please set FREESURFER_LICENSE in .bashrc" && exit 1;
 echo $FREESURFER_LICENSE > license.txt
 
