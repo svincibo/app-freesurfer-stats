@@ -1,7 +1,7 @@
 #!/bin/bash
 
-#set -x
-#set -e
+set -x
+set -e
 
 export SUBJECTS_DIR='./'
 
@@ -14,6 +14,10 @@ rd=`jq -r '.rd' config.json`
 ndi=`jq -r '.ndi' config.json`
 isovf=`jq -r '.isovf' config.json`
 odi=`jq -r '.odi' config.json`
+
+tmpdir='./tmp'
+
+[ ! -d ${tmpdir} ] && mkdir -p ${tmpdir}
 
 #### parse whether dti and NODDI are included or not ####
 echo "parsing input diffusion metrics"
@@ -39,17 +43,17 @@ do
 	[ ! -f ${MET}_ribbon.nii.gz ] && mri_vol2vol --mov ${metric} --targ ribbon.nii.gz --regheader --o ${MET}_ribbon.nii.gz
 
 	# generate stats file
-	[ ! -f subcort.${MET}.sum ] && mri_segstats --seg ${freesurfer}/mri/aseg.mgz --i ${MET}_ribbon.nii.gz --ctab $FREESURFER_HOME/FreeSurferColorLUT.txt --nonempty --exclude 0 --sum subcort.${MET}.sum
+	[ ! -f ${tmpdir}/subcort.${MET}.sum ] && mri_segstats --seg ${freesurfer}/mri/aseg.mgz --i ${MET}_ribbon.nii.gz --ctab $FREESURFER_HOME/FreeSurferColorLUT.txt --nonempty --exclude 0 --sum ${tmpdir}/subcort.${MET}.sum
 
 	# make stats file cleaner
-	[ ! -f subcort.${MET}.txt ] && tail subcort.${MET}.sum -n +55 > subcort.${MET}.txt
-	[ ! -f subcort_num.${MET}.csv ] && awk '{print $2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13}' subcort.${MET}.txt > subcort_num.${MET}.txt && sed 's/ *$//' subcort_num.${MET}.txt > subcort_num_nospace.${MET}.txt && sed 's/ \+/,/g' subcort_num_nospace.${MET}.txt > subcort_num.${MET}.csv
+	[ ! -f ${tmpdir}/subcort.${MET}.txt ] && tail ${tmpdir}/subcort.${MET}.sum -n +55 > ${tmpdir}/subcort.${MET}.txt
+	[ ! -f ${tmpdir}/subcort_num.${MET}.csv ] && awk '{print $2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13}' ${tmpdir}/subcort.${MET}.txt > ${tmpdir}/subcort_num.${MET}.txt && sed 's/ *$//' ${tmpdir}/subcort_num.${MET}.txt > ${tmpdir}/subcort_num_nospace.${MET}.txt && sed 's/ \+/,/g' ${tmpdir}/subcort_num_nospace.${MET}.txt > ${tmpdir}/subcort_num.${MET}.csv
 	
 	# error check
-	if [ ! -f subcort_num.${MET}.csv ]; then
+	if [ ! -f ${tmpdir}/subcort_num.${MET}.csv ]; then
 		echo "stats computation failed. check derivatives and error log"
 		exit 1
 	fi
 done
 
-[ ! -f subcort_cols.txt ] && tail subcort.${MET}.sum -n +54 > tmpdata.txt && head -n 1 tmpdata.txt > subcort_cols_spaces.txt && sed 's/ *$//' subcort_cols_spaces.txt > subcort_cols.txt
+[ ! -f ${tmpdir}/subcort_cols.txt ] && tail ${tmpdir}/subcort.${MET}.sum -n +54 > ${tmpdir}/tmpdata.txt && head -n 1 ${tmpdir}/tmpdata.txt > ${tmpdir}/subcort_cols_spaces.txt && sed 's/ *$//' ${tmpdir}/subcort_cols_spaces.txt > ${tmpdir}/subcort_cols.txt

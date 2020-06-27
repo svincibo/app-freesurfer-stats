@@ -15,16 +15,16 @@ with open('config.json') as config_f:
 if not os.path.exists('parc-stats'):
     os.mkdir('parc-stats')
 
-diffusion_measures = [ f.split('.')[1] for f in os.listdir('./') if f.split('.')[0] == 'subcort_num' if f.split('.')[2] == 'csv' ]
+diffusion_measures = [ f.split('.')[1] for f in os.listdir('./tmp/') if f.split('.')[0] == 'subcort_num' if f.split('.')[2] == 'csv' ]
 
 data_columns = ['parcID','subjectID','structureID','nodeID','number_of_voxels'] + diffusion_measures + ['volume']
 
 aseg_data = pd.DataFrame([],columns=data_columns)
 
-file_data_columns = open('subcort_cols.txt').read().split('#')[1].strip().split()[2:]
+file_data_columns = open('./tmp/subcort_cols.txt').read().split('#')[1].strip().split()[2:]
 
 for dm in range(len(diffusion_measures)):
-    measures = pd.read_csv(('subcort_num.%s.csv' %diffusion_measures[dm]),header=None,names=file_data_columns)
+    measures = pd.read_csv(('./tmp/subcort_num.%s.csv' %diffusion_measures[dm]),header=None,names=file_data_columns)
     if dm == 0:
         aseg_data['structureID'] = measures['StructName']
         aseg_data['subjectID'] = [ subjectID for f in range(len(aseg_data['structureID'])) ]
