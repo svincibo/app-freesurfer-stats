@@ -19,12 +19,18 @@ topdir = pwd;
 
 % Load configuration file
 config = loadjson('config.json');
+subjectID = config.x0x5F_inputs{1}.meta.subject
 
 % set path for parcellation
 parcellation = fullfile(config.parcellation);
 
 % run stats code
 [parcStats] = bsc_computeAtlasStats_v2(parcellation);
+
+% append subjectID
+for ii = 1:length(parcStats.actual_vol)
+    parcStats.subjectID(ii) = string(subjectID);
+end
 
 % save stats file
 writetable(parcStats,'rois.csv');
