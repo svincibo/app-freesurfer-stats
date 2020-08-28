@@ -9,26 +9,48 @@ import os
 import pandas as pd
 from freesurfer_stats import CorticalParcellationStats
 
-def extract_wm_stats(input_data_lines):
+def extract_wholebrain_stats(input_data_lines,version):
+    if version == 'v5':
+        tissueName = 'Cortical'
+        tissueNameLower = 'cortical'
+    else:
+        tissueName = 'Cerebral'
+        tissueNameLower = 'cerebral'
+
     lines_var = input_data_lines.readlines()
-    lh = lines_var[lines_var.index([ f for f in lines_var if 'lhCerebralWhiteMatter' in f ][0])]
-    lh = lh.replace(',','')
-    rh = lines_var[lines_var.index([ f for f in lines_var if 'rhCerebralWhiteMatter' in f ][0])]
-    rh = rh.replace(',','')
-    tot = lines_var[lines_var.index([ f for f in lines_var if 'Total cerebral white matter volume' in f ][0])]
-    tot = tot.replace(',','')
-    lh_wm_vol = float(lh.split()[10])
-    rh_wm_vol = float(rh.split()[10])
-    tot_wm_vol = float(tot.split()[9])
+    dataStructure = {}
 
-    return [lh_wm_vol,rh_wm_vol,tot_wm_vol]
+    for tissues in ['gm','wm']:
+        if tissues == 'gm':
+            name = 'CortexVol'
+            total_name = 'Total cortical gray matter volume'
+        else:
+            name = tissueName+'WhiteMatter'
+            total_name = 'Total '+tissueNameLower+' white matter volume'
 
+        dataStructure[tissues] = {}
+        dataStructure[tissues]['lh_volume'] = float(lines_var[lines_var.index([ f for f in lines_var if 'lh'+name in f ][0])].replace(',','').split()[10])
+        dataStructure[tissues]['rh_volume'] = float(lines_var[lines_var.index([ f for f in lines_var if 'rh'+name in f ][0])].replace(',','').split()[10])
+        dataStructure[tissues]['total_volume'] = float(lines_var[lines_var.index([ f for f in lines_var if total_name in f ][0])].replace(',','').split()[9])
+    
+    dataStructure['brain'] = {}
+    dataStructure['brain']['total_volume'] = float(lines_var[lines_var.index([ f for f in lines_var if 'BrainSegVol' in f ][0])].replace(',','').split()[7])
+    dataStructure['brain']['total_intracranial_volume'] = float(lines_var[lines_var.index([ f for f in lines_var if 'EstimatedTotalIntraCranialVol' in f ][0])].replace(',','').split()[8])
+
+    return dataStructure
 
 with open('config.json') as config_f:
     config = json.load(config_f)
     output_dir = config["freesurfer"]
     parc = config["parcellation"]
     subjectID = config['_inputs'][0]['meta']['subject']
+    fsurf_tags = config['_inputs'][0]['tags']
+
+# set flag if freesurfer version is v5
+if 'v5' in fsurf_tags:
+    fsurf_version = 'v5'
+else:
+    fsurf_version = 'v6+'
 
 # left hemisphere
 lh_stats = CorticalParcellationStats.read(output_dir+'/stats/lh.'+parc+'.stats')
@@ -57,19 +79,25 @@ dft = pd.concat([dfl,dfr],ignore_index=True)
 dft.to_csv('cortex.csv',index=False)
 
 # whole brain
-white_matter_stats = open(output_dir+'/stats/wmparc.stats')
-[lh_wm_vol,rh_wm_vol,tot_wm_vol] = extract_wm_stats(white_matter_stats)
+wholebrain = open(output_dir+'/stats/aseg.stats')
+wholebrain_data = extract_wholebrain_stats(wholebrain,fsurf_version)
+whole_brain = pd.DataFrame([],dtype=object)
+whole_brain = whole_brain.append({'subjectID': subjectID},ignore_index=True)
+whole_brain.insert(1,"Total_Brain_volume",wholebrain_data['brain']['total_volume'],True)
+whole_brain.insert(2,"Total_Intracranial_volume",wholebrain_data['brain']['total_intracranial_volume'],True)
+whole_brain.insert(3,"Total_Gray_Matter_volume",wholebrain_data['gm']['total_volume'],True)
+whole_brain.insert(4,"Total_White_Matter_volume",wholebrain_data['wm']['total_volume'],True)
+whole_brain.insert(5,"Left_Hemisphere_Gray_Matter_volume",wholebrain_data['gm']['lh_volume'],True)
+whole_brain.insert(6,"Right_Hemisphere_Gray_Matter_volume",wholebrain_data['gm']['rh_volume'],True)
+whole_brain.insert(7,"Left_Hemisphere_White_Matter_volume",wholebrain_data['wm']['lh_volume'],True)
+whole_brain.insert(8,"Right_Hemisphere_White_Matter_volume",wholebrain_data['wm']['rh_volume'],True)
+whole_brain.insert(9,"Left_Hemisphere_Mean_Gray_Matter_thickness",lh_stats.whole_brain_measurements['mean_thickness_mm'],True)
+whole_brain.insert(10,"Right_Hemisphere_Mean_Gray_Matter_thickness",rh_stats.whole_brain_measurements['mean_thickness_mm'],True)
 
-whole_brain = lh_stats.whole_brain_measurements[['brain_segmentation_volume_mm^3','estimated_total_intracranial_volume_mm^3']]
-whole_brain = whole_brain.rename(columns={"brain_segmentation_volume_mm^3": "Total Brain Volume", "estimated_total_intracranial_volume_mm^3": "Total Intracranial Volume"})
-whole_brain.insert(2,"subjectID",subjectID)
-whole_brain.insert(3,"Total Cortical Gray Matter Volume",lh_stats.whole_brain_measurements['total_cortical_gray_matter_volume_mm^3'],True)
-whole_brain.insert(4,"Total White Matter Volume",tot_wm_vol,True)
-whole_brain.insert(5,"Left Hemisphere Cortical Gray Matter Volume",numpy.sum(lh_stats.structural_measurements['gray_matter_volume_mm^3']),True)
-whole_brain.insert(6,"Right Hemisphere Cortical Gray Matter Volume",numpy.sum(rh_stats.structural_measurements['gray_matter_volume_mm^3']),True)
-whole_brain.insert(7,"Left Hemisphere White Matter Volume",lh_wm_vol,True)
-whole_brain.insert(8,"Right Hemisphere White Matter Volume",rh_wm_vol,True)
-whole_brain.insert(9,"Left Hemisphere Mean Cortical Gray Matter Thickness",lh_stats.whole_brain_measurements['mean_thickness_mm'],True)
-whole_brain.insert(10,"Right Hemisphere Mean Cortical Gray Matter Thickness",rh_stats.whole_brain_measurements['mean_thickness_mm'],True)
-whole_brain = whole_brain.reindex(columns=['subjectID','Total Brain Volume','Total Intracranial Volume','Total Cortical Gray Matter Volume','Total White Matter Volume','Left Hemisphere Cortical Gray Matter Volume','Right Hemisphere Cortical Gray Matter Volume','Left Hemisphere White Matter Volume','Right Hemisphere White Matter Volume','Left Hemisphere Mean Cortical Gray Matter Thickness','Right Hemisphere Mean Cortical Gray Matter Thickness'])
 whole_brain.to_csv('whole_brain.csv',index=False)
+
+# append subject ID to data with coordinates from dan's code
+rois = pd.read_csv('rois.csv')
+rois['subjectID'] = [ subjectID for x in range(len(rois['ROI_name'])) ]
+rois = rois[ ['subjectID'] +  [ f for f in rois.columns if f != 'subjectID']] 
+rois.to_csv('rois.csv',index=False)
