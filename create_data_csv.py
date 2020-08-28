@@ -39,6 +39,22 @@ def extract_wholebrain_stats(input_data_lines,version):
 
     return dataStructure
 
+def create_wholebrain_csv(wb_data,lh_data,rh_data,subjectID):
+    whole_brain = pd.DataFrame([],dtype=object)
+    whole_brain = whole_brain.append({'subjectID': subjectID},ignore_index=True)
+    whole_brain.insert(1,"Total_Brain_volume",wb_data['brain']['total_volume'],True)
+    whole_brain.insert(2,"Total_Intracranial_volume",wb_data['brain']['total_intracranial_volume'],True)
+    whole_brain.insert(3,"Total_Gray_Matter_volume",wb_data['gm']['total_volume'],True)
+    whole_brain.insert(4,"Total_White_Matter_volume",wb_data['wm']['total_volume'],True)
+    whole_brain.insert(5,"Left_Hemisphere_Gray_Matter_volume",wb_data['gm']['lh_volume'],True)
+    whole_brain.insert(6,"Right_Hemisphere_Gray_Matter_volume",wb_data['gm']['rh_volume'],True)
+    whole_brain.insert(7,"Left_Hemisphere_White_Matter_volume",wb_data['wm']['lh_volume'],True)
+    whole_brain.insert(8,"Right_Hemisphere_White_Matter_volume",wb_data['wm']['rh_volume'],True)
+    whole_brain.insert(9,"Left_Hemisphere_Mean_Gray_Matter_thickness",lh_data.whole_brain_measurements['mean_thickness_mm'],True)
+    whole_brain.insert(10,"Right_Hemisphere_Mean_Gray_Matter_thickness",rh_data.whole_brain_measurements['mean_thickness_mm'],True)
+
+    return whole_brain
+
 with open('config.json') as config_f:
     config = json.load(config_f)
     output_dir = config["freesurfer"]
@@ -81,19 +97,7 @@ dft.to_csv('cortex.csv',index=False)
 # whole brain
 wholebrain = open(output_dir+'/stats/aseg.stats')
 wholebrain_data = extract_wholebrain_stats(wholebrain,fsurf_version)
-whole_brain = pd.DataFrame([],dtype=object)
-whole_brain = whole_brain.append({'subjectID': subjectID},ignore_index=True)
-whole_brain.insert(1,"Total_Brain_volume",wholebrain_data['brain']['total_volume'],True)
-whole_brain.insert(2,"Total_Intracranial_volume",wholebrain_data['brain']['total_intracranial_volume'],True)
-whole_brain.insert(3,"Total_Gray_Matter_volume",wholebrain_data['gm']['total_volume'],True)
-whole_brain.insert(4,"Total_White_Matter_volume",wholebrain_data['wm']['total_volume'],True)
-whole_brain.insert(5,"Left_Hemisphere_Gray_Matter_volume",wholebrain_data['gm']['lh_volume'],True)
-whole_brain.insert(6,"Right_Hemisphere_Gray_Matter_volume",wholebrain_data['gm']['rh_volume'],True)
-whole_brain.insert(7,"Left_Hemisphere_White_Matter_volume",wholebrain_data['wm']['lh_volume'],True)
-whole_brain.insert(8,"Right_Hemisphere_White_Matter_volume",wholebrain_data['wm']['rh_volume'],True)
-whole_brain.insert(9,"Left_Hemisphere_Mean_Gray_Matter_thickness",lh_stats.whole_brain_measurements['mean_thickness_mm'],True)
-whole_brain.insert(10,"Right_Hemisphere_Mean_Gray_Matter_thickness",rh_stats.whole_brain_measurements['mean_thickness_mm'],True)
-
+whole_brain = create_wholebrain_csv(wholebrain_data,lh_stats,rh_stats,subjectID)
 whole_brain.to_csv('whole_brain.csv',index=False)
 
 # append subject ID to data with coordinates from dan's code
