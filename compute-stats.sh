@@ -9,7 +9,7 @@ hemi="lh rh"
 [ ! -d ./output/ ] && mkdir output && cp -R ${freesurfer}/* ./output/ && chmod -R +rw ./output
 
 # copy parcellation
-[ ! -d ./parc.nii.gz ] && cp ${parc} ./parc.nii.gz && chmod +rw ./parc.nii.gz && parc="./parc.nii.gz"
+[ ! -d ./parc.nii.gz ] && cp ${parc} ./parc.nii.gz && chmod +rw ./parc.nii.gz
 
 export SUBJECTS_DIR=./
 
@@ -17,7 +17,7 @@ export SUBJECTS_DIR=./
 [ ! -f ./ribbon.nii.gz ] && mri_convert ./output/mri/ribbon.mgz ./ribbon.nii.gz
 
 # move parc into ribbon space
-[ ! -f ./parc.nii.gz ] && mri_vol2vol --mov ${parc} --targ ./ribbon.nii.gz --regheader --interp nearest --o ./parc.nii.gz
+[ ! -f ./parc.nii.gz ] && mri_vol2vol --mov ./parc.nii.gz --targ ./ribbon.nii.gz --regheader --interp nearest --o ./parc.nii.gz
 
 # create hemispheric annotation files (lut needs to be created first)
 for HEMI in ${hemi}
