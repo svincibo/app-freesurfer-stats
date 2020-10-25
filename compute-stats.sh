@@ -8,10 +8,13 @@ hemi="lh rh"
 # copy freesurfer directory
 [ ! -d ./output/ ] && mkdir output && cp -R ${freesurfer}/* ./output/ && chmod -R +rw ./output
 
+# copy parcellation
+[ ! -d ./parc.nii.gz ] && cp ${parc} ./parc.nii.gz && chmod +rw ./parc.nii.gz && parc="./parc.nii.gz"
+
 export SUBJECTS_DIR=./
 
 # convert ribbon
-[ ! -f ./ribbon.nii.gz ] && mri_convert ./output/ribbon.mgz ./ribbon.nii.gz
+[ ! -f ./ribbon.nii.gz ] && mri_convert ./output/mri/ribbon.mgz ./ribbon.nii.gz
 
 # move parc into ribbon space
 [ ! -f ./parc.nii.gz ] && mri_vol2vol --mov ${parc} --targ ./ribbon.nii.gz --regheader --interp nearest --o ./parc.nii.gz
