@@ -60,7 +60,7 @@ with open('config.json') as config_f:
     output_dir = './output'
     parc = config["parcellation"]
     subjectID = config['_inputs'][0]['meta']['subject']
-    fsurf_tags = config['_inputs'][0]['tags']
+    fsurf_tags = config['_inputs'][1]['tags']
 
 # set flag if freesurfer version is v5
 if 'v5' in fsurf_tags:
