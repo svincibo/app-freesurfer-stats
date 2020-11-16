@@ -39,6 +39,23 @@ def extract_wholebrain_stats(input_data_lines,version):
 
     return dataStructure
 
+def extract_subcortical_stats(input_data_lines,version,subjectID):
+
+    lines_var = input_data_lines.readlines()
+    subcort_data = [ f for f in lines_var if '#' not in f ]
+
+    outdata = pd.DataFrame(columns={'segID','subjectID','structureID', 'nodeID', 'number_of_voxels', 'gray_matter_volume_mm^3'})
+    outdata['segID'] = [ f.split()[1] for f in subcort_data ]
+    outdata['structureID'] = [ f.split()[4] for f in subcort_data ]
+    outdata['subjectID'] = [ subjectID for f in range(len(outdata['structureID'])) ]
+    outdata['nodeID'] = [ 1 for f in range(len(outdata['structureID'])) ]
+    outdata['number_of_voxels'] = [ f.split()[2] for f in subcort_data ]
+    outdata['gray_matter_volume_mm^3'] = [ f.split()[3] for f in subcort_data ]
+
+    outdata = outdata.reindex(columns=['segID','subjectID','structureID', 'nodeID', 'number_of_voxels', 'gray_matter_volume_mm^3'])
+
+    return outdata
+
 def create_wholebrain_csv(wb_data,lh_data,rh_data,subjectID):
     whole_brain = pd.DataFrame([],dtype=object)
     whole_brain = whole_brain.append({'subjectID': subjectID},ignore_index=True)
@@ -99,6 +116,11 @@ wholebrain = open(output_dir+'/stats/aseg.stats')
 wholebrain_data = extract_wholebrain_stats(wholebrain,fsurf_version)
 whole_brain = create_wholebrain_csv(wholebrain_data,lh_stats,rh_stats,subjectID)
 whole_brain.to_csv('whole_brain.csv',index=False)
+
+# subcortical stats
+wholebrain = open(output_dir+'/stats/aseg.stats')
+subcortical = extract_subcortical_stats(wholebrain,fsurf_version,subjectID)
+subcortical.to_csv('subcortical.csv',index=False)
 
 # append subject ID to data with coordinates from dan's code
 rois = pd.read_csv('rois.csv')
