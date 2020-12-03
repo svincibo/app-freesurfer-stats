@@ -37,7 +37,7 @@ def main():
 	outfile = 'lut.txt'
 
 	# create color lut
-	createColorLUT(keyfile,outfile)
+	createColorLUT(labelfile,outfile)
 
 if __name__ == '__main__':
 	main()
