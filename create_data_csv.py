@@ -58,7 +58,6 @@ def create_wholebrain_csv(wb_data,lh_data,rh_data,subjectID):
 with open('config.json') as config_f:
     config = json.load(config_f)
     output_dir = './output'
-    parc = config["parcellation"]
     subjectID = config['_inputs'][0]['meta']['subject']
     fsurf_tags = config['_inputs'][1]['tags']
 
