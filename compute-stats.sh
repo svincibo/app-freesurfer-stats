@@ -23,13 +23,13 @@ do
 	#### convert annotation files to useable label giftis ####
 	[ ! -f ${HEMI}.parc.label.gii ] && mris_convert --annot ${parc} \
 		${pial} \
-		${HEMI}.parc.label.gii
+		${HEMI}.parc.annot
 
 	#### compute stats with mris_anatomical_stats ####
 	[ ! -f ${HEMI}.parc.stats ] && mris_anatomical_stats -th3 \
 		-mgz \
 		-b \
-		-a ${HEMI}.parc.label.gii \
+		-a ${HEMI}.parc.annot \
 		-f ${HEMI}.parc.stats \
 		-c ./lut.txt \
 		output \
