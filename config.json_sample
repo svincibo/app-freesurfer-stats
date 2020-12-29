@@ -1,4 +1,6 @@
 {
 	"freesurfer":	"testdata/freesurfer/output/",
-	"parcellation":	"aparc.a2009s"
+	"lh_annot":	"testdata/parcellation/lh.annot.gii",
+	"rh_annot":	"testdata/parcellation/rh.annot.gii",
+	"label":	"testdata/parcellation/label.json"
 }

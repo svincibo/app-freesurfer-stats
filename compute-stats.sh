@@ -1,30 +1,33 @@
 #!/bin/bash
 
 freesurfer=`jq -r '.freesurfer' config.json`
-parc=`jq -r '.parcellation' config.json`
+lh_annot=`jq -r '.lh_annot' config.json`
+rh_annot=`jq -r '.rh_annot' config.json`
 key=`jq -r '.key' config.json`
 hemi="lh rh"
 
 # copy freesurfer directory
 [ ! -d ./output/ ] && mkdir output && cp -R ${freesurfer}/* ./output/ && chmod -R +rw ./output
 
-# copy parcellation
-[ ! -d ./parc.nii.gz ] && cp ${parc} ./output/mri/parc.nii.gz && chmod +rw ./output/mri/parc.nii.gz
-
+# export subjects_dir to pwd
 export SUBJECTS_DIR=./
 
-# convert ribbon
-[ ! -f ./ribbon.nii.gz ] && mri_convert ./output/mri/ribbon.mgz ./ribbon.nii.gz
-
-# move parc into ribbon space
-[ ! -f ./parc.nii.gz ] && mri_vol2vol --mov parc.nii.gz --targ ./ribbon.nii.gz --regheader --interp nearest --o ./parc.nii.gz
-
-# create hemispheric annotation files (lut needs to be created first)
+# loop through hemisphere annotations and convert to usable gii and compute stats
 for HEMI in ${hemi}
 do
-	# create annotation file from parc volume
-	[ ! -f ./${HEMI}.parc.annot ] && mris_sample_parc -ct ./lut.txt output ${HEMI} parc.nii.gz ./${HEMI}.parc.annot
+	echo "converting files for ${HEMI}"
+	parc=$(eval "echo \$${HEMI}_annot")
+	pial=$(eval "echo \$${HEMI}_pial")
 
-	# compute stats
-	[ ! -f ./${HEMI}.parc.stats ] && mris_anatomical_stats -a ./${HEMI}.parc.annot -f ./${HEMI}.parc.stats output ${HEMI}
+	# convert surface parcellations that came from multi atlas transfer tool
+	#### convert annotation files to useable label giftis ####
+	[ ! -f ${HEMI}.parc.label.gii ] && mris_convert --annot ${parc} \
+		${pial} \
+		${HEMI}.parc.label.gii
+
+	#### compute stats with mris_anatomical_stats ####
+	[ ! -f ${HEMI}.parc.stats ] && mris_anatomical_stats -a ${HEMI}.parc.label.gii \
+		-f ${HEMI}.parc.stats \
+		output \
+		${HEMI}
 done

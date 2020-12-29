@@ -3,20 +3,14 @@
 #PBS -N app-parcellation-stats
 #PBS -V
 
-parc=`jq -r '.parcellation' config.json`
-
 if [ ! -f lut.txt ]; then
 	time singularity exec -e docker://brainlife/freesurfer-stats:1.2 ./createColorLUT.py
-fi
-
-if [ ! -f rois.csv ]; then
-	time singularity exec -e docker://brainlife/mcr:r2019a ./compiled/parcRoiStats
 fi
 
 [ -z "$FREESURFER_LICENSE" ] && echo "Please set FREESURFER_LICENSE in .bashrc" && exit 1;
 echo $FREESURFER_LICENSE > license.txt
 
-if [ ! -f rh.parc.annot ]; then
+if [ ! -f rh.parc.label.gii ]; then
 	time singularity exec -e -B `pwd`/license.txt:/usr/local/freesurfer/license.txt docker://brainlife/freesurfer:6.0.0 ./compute-stats.sh
 fi
 
@@ -27,7 +21,6 @@ fi
 if [ ! -f whole_brain.csv ] || [ ! -f rois.csv ]; then
 	echo "output missing" && exit 1
 else
-	echo "complete" && mkdir -p ./parc-stats/ && mv *.csv ./parc-stats/ && rm -rf *.nii.gz *.annot *.stats lut.txt
-	echo "{\"tags\": [\"${parc}\"]}" > product.json
+	echo "complete" && mkdir -p ./parc-stats/ && mv *.csv ./parc-stats/ && rm -rf *.nii.gz *.gii *.stats lut.txt
    	exit 0
 fi
