@@ -26,8 +26,13 @@ do
 		${HEMI}.parc.label.gii
 
 	#### compute stats with mris_anatomical_stats ####
-	[ ! -f ${HEMI}.parc.stats ] && mris_anatomical_stats -a ${HEMI}.parc.label.gii \
+	[ ! -f ${HEMI}.parc.stats ] && mris_anatomical_stats -th3 \
+		-mgz \
+		-b \
+		-a ${HEMI}.parc.label.gii \
 		-f ${HEMI}.parc.stats \
+		-c ./lut.txt \
 		output \
-		${HEMI}
+		${HEMI} \
+		white
 done
