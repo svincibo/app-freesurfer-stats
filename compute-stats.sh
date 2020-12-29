@@ -21,7 +21,7 @@ do
 
 	# convert surface parcellations that came from multi atlas transfer tool
 	#### convert annotation files to useable label giftis ####
-	[ ! -f ${HEMI}.parc.label.gii ] && mris_convert --annot ${parc} \
+	[ ! -f ${HEMI}.parc.annot ] && mris_convert --annot ${parc} \
 		${pial} \
 		./${HEMI}.parc.annot
 
