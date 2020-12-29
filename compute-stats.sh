@@ -17,7 +17,7 @@ for HEMI in ${hemi}
 do
 	echo "converting files for ${HEMI}"
 	parc=$(eval "echo \$${HEMI}_annot")
-	pial=$(eval "echo \$${HEMI}_pial")
+	pial="./output/surf/${HEMI}.pial"
 
 	# convert surface parcellations that came from multi atlas transfer tool
 	#### convert annotation files to useable label giftis ####
